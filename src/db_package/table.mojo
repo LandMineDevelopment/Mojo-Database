@@ -136,7 +136,7 @@ struct DBTable:
     # Methods: read
     # ===-------------------------------------------------------------------===#
     
-    fn filter(self, columnNames: List[Int], columnValues: List[List[Int]]) raises -> DBTable:
+    fn filter(self, columnNames: List[Int], columnValues: List[List[Int]]) raises -> Set[Int]:
         print('Filtering....')
         print('-----------------------------')
         var filter_column_len = len(columnNames)
@@ -166,18 +166,30 @@ struct DBTable:
         print('combine OR vals & find common rows')    
         print(str((now()-start)/1_000_000_000)+'sec')
 
-        start = now()
-        var newNumOfRows = len(resSet)
-        var retTab = DBTable(numOfColumns = numOfColumns, numOfRows = newNumOfRows)
         
-        for col in range(numOfColumns):
-            for row in resSet:
-                retTab.table.append(self[col, row[]])
-
-        print('create ret tab')    
-        print(str((now()-start)/1_000_000_000)+'sec')
         print('-----------------------------')
         print('TOTAL FILTER TIME: '+str((now()-total)/1_000_000_000)+'sec')
+        return resSet^
+
+    #TODO currently no way to preserve column index to translate back to lookup,
+    #     need some way to identify each column later
+    #     1. could have index 0 of each column contain the identifier
+    #     2. could pass lookup to return table (requires lookup to be apart of table?)
+    fn applySettings(self, rowSet: Set[Int], colList: List[Int] = List[Int]()) raises -> Self:
+        var numOfRows = len(rowSet)
+        var numOfColumns: Int
+        
+        if len(colList) == 0:
+            numOfColumns = self.numOfColumns
+        else:
+            numOfColumns = len(colList)
+
+        var retTab = DBTable(numOfColumns = numOfColumns, numOfRows = numOfRows)
+        for col in colList:
+            for row in rowSet:
+                retTab.table.append(self[col[],row[]])
+        
         return retTab^
+
     
 

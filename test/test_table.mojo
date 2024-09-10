@@ -7,9 +7,8 @@ alias tab_columns = 5
 alias val_range = 5    
 
 
-
 # ===-------------------------------------------------------------------===#
-# dunder: __eq__
+# Setup functions
 # ===-------------------------------------------------------------------===#
 
 def createTable() -> DBTable:
@@ -19,6 +18,36 @@ def createTable() -> DBTable:
         for row in range(tab_row_count):
             tab[col*tab_row_count + row] = row%val_range
     return tab
+
+def createRandomTable() -> DBTable:
+    var tab = DBTable(numOfColumns = tab_columns, numOfRows = tab_row_count)
+
+    for col in range(tab_columns):
+        for row in range(tab_row_count):
+            tab[col*tab_row_count + row] = int(random_ui64(1,val_range))
+    return tab^
+
+
+def createFilterCols(filter_cols: Int) -> List[Int]:
+    var lst = List[Int]()
+    for x in range(filter_cols):
+        lst.append(x)
+    return lst^
+
+def createFilterVals(filter_cols: Int, filter_vals: Int) -> List[List[Int]]:
+    var outer = List[List[Int]]()
+    var inner: List[Int]
+    for x in range(filter_cols):
+        inner = List[Int]()
+        for y in range(filter_vals):
+            inner.append(y)
+        outer.append(inner)
+    return outer^
+
+
+# ===-------------------------------------------------------------------===#
+# dunder: __eq__
+# ===-------------------------------------------------------------------===#
 
 def test_eq():
     rhs = createTable()
@@ -46,38 +75,41 @@ def test_ne_rows():
 # ===-------------------------------------------------------------------===#
 # method: filter
 # ===-------------------------------------------------------------------===#
-def createFilterCols(filter_cols: Int) -> List[Int]:
-    var lst = List[Int]()
-    for x in range(filter_cols):
-        lst.append(x)
-    return lst^
-
-def createFilterVals(filter_cols: Int, filter_vals: Int) -> List[List[Int]]:
-    var outer = List[List[Int]]()
-    var inner: List[Int]
-    for x in range(filter_cols):
-        inner = List[Int]()
-        for y in range(filter_vals):
-            inner.append(y)
-        outer.append(inner)
-    return outer^
 
 def test_filter():
-    alias filter_cols = 1
-    alias filter_vals = 1
+    alias filter_cols = 2
+    alias filter_vals = 2
     
     var tab = createTable()
     var filCols = createFilterCols(filter_cols)
     var filVals = createFilterVals(filter_cols, filter_vals)
 
-    var resTab = tab.filter(filCols,filVals)
+    var resSet = tab.filter(filCols,filVals)
     
-    # assert_equal(resTab.numOfRows, 1, msg = 'filter error: returns more/less rows than expected')
-    # assert_equal(resTab.numOfColumns, tab.numOfColumns, msg = 'filter error: returns more/less columns than expected')
-    # assert_equal(resTab[0,0], 0, msg = 'filter error: returns a row with value not in the filter set')
-
     var valSet: Set[Int]
     for col in filCols:
         valSet = filVals[col[]]
-        for row in range(resTab.numOfRows):
-            assert_true(resTab[col[],row] in valSet, 'filter error: returns a value not in the filter set')
+        for row in resSet:
+            assert_true(tab[col[],row[]] in valSet, 'filter error: returns a value not in the filter set')
+
+# ===-------------------------------------------------------------------===#
+# method: applySettings
+# ===-------------------------------------------------------------------===#
+
+#TODO account for loss of column Id that occurs after filtering
+def test_applySettings():
+    alias filter_cols = 2
+    alias filter_vals = 2
+    
+    var tab = createTable()
+    var filCols = createFilterCols(filter_cols)
+    var filVals = createFilterVals(filter_cols, filter_vals)
+
+    var resSet = tab.filter(filCols,filVals)
+    var newTab = tab.applySettings(resSet)
+    
+    var valSet: Set[Int]
+    for col in filCols:
+        valSet = filVals[col[]]
+        for row in resSet:
+            assert_true(newTab[col[],row[]] in valSet, 'applySettings error: returns a value not in the filter set')
