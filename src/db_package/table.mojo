@@ -1,5 +1,6 @@
 from collections import List
 from collections.dict import Dict, _DictKeyIter, _DictValueIter, _DictEntryIter
+from time import now
 
 
 
@@ -134,75 +135,49 @@ struct DBTable:
     # ===-------------------------------------------------------------------===#
     # Methods: read
     # ===-------------------------------------------------------------------===#
-    '''
-    fn tableFilter(self, columnNames: List[Int], columnValues: List[List[Int]]) raises -> DBTable:
+    
+    fn filter(self, columnNames: List[Int], columnValues: List[List[Int]]) raises -> DBTable:
+        print('Filtering....')
+        print('-----------------------------')
         var filter_column_len = len(columnNames)
         var resSet = Set[Int]()
         var numOfColumns = self.numOfColumns
         var numOfRows = self.numOfRows
 
+        var total = now()
+        
+        #rows for the first column
         var start = now()
         var valSet = Set[Int](columnValues[0])
-
-        #rows for the first column
-        # for row in range(numOfRows):
-        #     if tab[row] in valSet:
-        #         resSet.add(row)
-        # print('get rowlist from first column')    
-        # print(str((now()-start)/1_000_000_000)+'sec')
-
-        start = now()
-        # var colAve = 0.0
-        # var colTime = now()
-
-        # for row in resSet:
-        #     for col in range(1, filter_column_len):
-        #         colTime = now()
-        #         valSet = Set[Int](columnValues[col])
-        #         if tab[col,row[]] not in valSet:
-        #             resSet.remove(row[])
-        #             colAve += (now()-colTime)/1_000_000_000
-        #             break
-        #         colAve += (now()-colTime)/1_000_000_000
-        # print('colAve:')
-        # print(str(colAve/(filter_column_len-1))+'sec')
-        var hashed = 0
-        var checkSet = Set[Int]()
-        for l in range(len(columnValues)):
-            hashed = hash(l)
-            for elem in columnValues[l]:
-                hashed = hash(hashed+elem[])
-                checkSet.add(hashed)
-
-        
-        
-        var commonRow = True 
         for row in range(numOfRows):
-            commonRow = True 
-            for col in range(filter_column_len):
-                
-                # if tab[col,row] not in columnValues[col]:
-                if hash(hash(col)+self.table[col,row]) in checkSet:
-                    commonRow = False
-                    break
-            if commonRow:
+            if self[row] in valSet:
                 resSet.add(row)
+        print('get rowlist from first column')    
+        print(str((now()-start)/1_000_000_000)+'sec')
+
+        #remove rows from resSet that are not true for other filter columns
+        start = now()
+        for col in range(filter_column_len): 
+            valSet = Set(columnValues[col])
+            for row in resSet:
+                if self[col,row[]] not in valSet:
+                    resSet.remove(row[])
 
         print('combine OR vals & find common rows')    
         print(str((now()-start)/1_000_000_000)+'sec')
 
         start = now()
         var newNumOfRows = len(resSet)
-        var retTab = DBTable[Int](numOfColumns = numOfColumns, numOfRows = newNumOfRows)
-        # retTab.table.resize(numOfColumns*newNumOfRows, 0)
+        var retTab = DBTable(numOfColumns = numOfColumns, numOfRows = newNumOfRows)
         
         for col in range(numOfColumns):
             for row in resSet:
-                retTab.append(tab[col, row[]])
-                # retTab[col,row[]] = tab[col, row[]]
+                retTab.table.append(self[col, row[]])
 
         print('create ret tab')    
         print(str((now()-start)/1_000_000_000)+'sec')
-        return retTab
-    '''
+        print('-----------------------------')
+        print('TOTAL FILTER TIME: '+str((now()-total)/1_000_000_000)+'sec')
+        return retTab^
+    
 
