@@ -2,8 +2,8 @@ from db_package.table import DBTable
 from random import random_ui64
 from time import now
 
-alias tab_row_count = 1_000_000 
-alias tab_columns = 1_000
+alias tab_row_count = 10
+alias tab_columns = 5
 alias val_range = 20    
 alias filter_cols = 5
 alias filter_vals = 10
@@ -43,6 +43,7 @@ def createFilterVals() -> List[List[Int]]:
 
 def main():
     var tab = createTable()
+    print(tab)
 
 
     var filter_cols = createFilterCols()
@@ -73,5 +74,6 @@ def main():
 
     print('\nresTab')
     print('Column Count:', restTab.numOfColumns, 'Row Count:', restTab.numOfRows)
+    var s = Set(5)
 
-    
+###currently working on lookups   

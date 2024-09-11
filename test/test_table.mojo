@@ -17,7 +17,15 @@ def createTable() -> DBTable:
     for col in range(tab_columns):
         for row in range(tab_row_count):
             tab[col*tab_row_count + row] = row%val_range
-    return tab
+    return tab^
+
+def createTable(columnNames: List[String]) -> DBTable:
+    var tab = DBTable(numOfColumns = tab_columns, numOfRows = tab_row_count, columnNames = columnNames)
+
+    for col in range(tab_columns):
+        for row in range(tab_row_count):
+            tab[col*tab_row_count + row] = row%val_range
+    return tab^
 
 def createRandomTable() -> DBTable:
     var tab = DBTable(numOfColumns = tab_columns, numOfRows = tab_row_count)
@@ -27,6 +35,13 @@ def createRandomTable() -> DBTable:
             tab[col*tab_row_count + row] = int(random_ui64(1,val_range))
     return tab^
 
+def createRandomTable(columnNames: List[String]) -> DBTable:
+    var tab = DBTable(numOfColumns = tab_columns, numOfRows = tab_row_count, columnNames = columnNames)
+
+    for col in range(tab_columns):
+        for row in range(tab_row_count):
+            tab[col*tab_row_count + row] = int(random_ui64(1,val_range))
+    return tab^
 
 def createFilterCols(filter_cols: Int) -> List[Int]:
     var lst = List[Int]()
@@ -43,6 +58,26 @@ def createFilterVals(filter_cols: Int, filter_vals: Int) -> List[List[Int]]:
             inner.append(y)
         outer.append(inner)
     return outer^
+
+# ===-------------------------------------------------------------------===#
+# Life cycle methods
+# ===-------------------------------------------------------------------===#
+
+def test_init():
+    var colNameList = List[String]()
+    for name in range(tab_columns+1):
+        colNameList.append('t'+str(name))
+    
+    #test too many columnNames
+    with assert_raises():
+        _ = createTable(colNameList)
+    
+    _ = colNameList.pop()
+    _ = colNameList.pop()
+    
+    #test too few columnNames
+    with assert_raises():
+        _ = createTable(colNameList)
 
 
 # ===-------------------------------------------------------------------===#
@@ -95,8 +130,7 @@ def test_filter():
 # ===-------------------------------------------------------------------===#
 # method: applySettings
 # ===-------------------------------------------------------------------===#
-
-#TODO account for loss of column Id that occurs after filtering
+#TODO add testing on columnNames
 def test_applySettings():
     alias filter_cols = 2
     alias filter_vals = 2
